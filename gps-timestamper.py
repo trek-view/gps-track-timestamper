@@ -13,6 +13,7 @@ import xml.sax
 import csv
 import datetime
 import gpxpy
+import traceback
 
 
 def validate_file_type(path):
@@ -41,6 +42,8 @@ def update_gps_track_log(log_path, output_path, offset):
     support gpx and exif csv file.
     """
     file_type = validate_file_type(log_path)
+    updated_points = 0
+    removed_points = 0
 
     if file_type == 'file type is not correct':
         return False
@@ -58,6 +61,9 @@ def update_gps_track_log(log_path, output_path, offset):
                         'GPSDateStamp': new_date_time.strftime('%Y:%m:%d'),
                         'GPSTimeStamp': new_date_time.strftime('%H:%M:%S')
                     })
+                    updated_points += 1
+                else:
+                    removed_points += 1
                 track_logs.append(i)
         with open(output_path, 'w') as output_file:
             writer = csv.DictWriter(output_file, fieldnames=track_logs[0].keys())
@@ -78,13 +84,18 @@ def update_gps_track_log(log_path, output_path, offset):
                         gpx_segment = gpxpy.gpx.GPXTrackSegment()
                         gpx_track.segments.append(gpx_segment)
                         for point in segment.points:
-                            gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(
-                                latitude=point.latitude, longitude=point.longitude, time=point.time + datetime.timedelta(0, offset)))
+                            if point.time:
+                                gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(
+                                    latitude=point.latitude, longitude=point.longitude, time=point.time + datetime.timedelta(0, offset)))
+                                updated_points += 1
+                            else:
+                                removed_points += 1
 
             except Exception as e:
                 input("""It's not correct GPX file.\n\nPress any key to quit""")
                 quit()
 
+        print('Updated Points : {} \n\nRemoved Points: {}'.format(updated_points, removed_points))
         with open(output_path, "w") as f:
             f.write(new_gpx.to_xml())
 

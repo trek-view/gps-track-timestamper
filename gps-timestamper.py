@@ -68,8 +68,7 @@ def update_gps_track_log(log_path, output_path, offset):
         with open(output_path, 'w') as output_file:
             writer = csv.DictWriter(output_file, fieldnames=track_logs[0].keys())
             writer.writeheader()
-            for data in track_logs:
-                writer.writerow(data)
+            writer.writerows(track_logs)
 
     else:
         new_gpx = gpxpy.gpx.GPX()

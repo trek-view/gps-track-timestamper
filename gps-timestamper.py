@@ -120,7 +120,7 @@ def update_log(args):
 
     update_gps_track_log(log_path, output_logo_file, offset)
 
-    input('\nMetadata successfully added to images.\n\nPress any key to quit')
+    input('\nTimestamps successfully updated in new file.\n\nPress any key to quit')
     quit()
 
 

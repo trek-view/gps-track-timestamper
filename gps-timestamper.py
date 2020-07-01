@@ -13,7 +13,6 @@ import xml.sax
 import csv
 import datetime
 import gpxpy
-import traceback
 
 
 def validate_file_type(path):
@@ -65,7 +64,7 @@ def update_gps_track_log(log_path, output_path, offset):
                 else:
                     removed_points += 1
                 track_logs.append(i)
-        with open(output_path, 'w') as output_file:
+        with open(output_path, 'w', newline='') as output_file:
             writer = csv.DictWriter(output_file, fieldnames=track_logs[0].keys())
             writer.writeheader()
             writer.writerows(track_logs)
@@ -84,8 +83,8 @@ def update_gps_track_log(log_path, output_path, offset):
                         gpx_track.segments.append(gpx_segment)
                         for point in segment.points:
                             if point.time:
-                                gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(
-                                    latitude=point.latitude, longitude=point.longitude, time=point.time + datetime.timedelta(0, offset)))
+                                point.adjust_time(datetime.timedelta(0, offset))
+                                gpx_segment.points.append(point)
                                 updated_points += 1
                             else:
                                 removed_points += 1
